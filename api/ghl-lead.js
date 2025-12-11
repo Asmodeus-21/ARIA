@@ -1,9 +1,7 @@
-// /api/ghl-lead.js
-
 const ALLOWED_ORIGINS = [
   'https://ariagroups.xyz',
   'https://www.ariagroups.xyz',
-  'http://localhost:5173', // local dev
+  'http://localhost:5173',
 ];
 
 function cors(res, origin) {
@@ -16,18 +14,15 @@ function cors(res, origin) {
 
 export default async function handler(req, res) {
   cors(res, req.headers.origin);
-
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GHL_API_KEY;
   const locationId = process.env.GHL_LOCATION_ID;
-  if (!apiKey || !locationId) {
-    return res.status(500).json({ error: 'Server not configured: missing env vars' });
-  }
+  if (!apiKey || !locationId) return res.status(500).json({ error: 'Server not configured: missing env vars' });
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     const { name, firstName, lastName, email, phone, company, message, tags, source, pageUrl,
             utm_source, utm_medium, utm_campaign, utm_term, utm_content } = body;
 
@@ -40,7 +35,6 @@ export default async function handler(req, res) {
     const incomingTags = Array.isArray(tags) ? tags : (typeof tags === 'string' && tags.trim() ? [tags.trim()] : []);
     const finalTags = [...defaultTag, ...incomingTags].filter(Boolean);
 
-    // 1) Upsert Contact
     const contactPayload = {
       locationId,
       source: source || 'Website',
@@ -67,7 +61,6 @@ export default async function handler(req, res) {
 
     const contactId = contactData?.contact?.id || contactData?.id;
 
-    // 2) Save message/UTMs as a Note (optional but useful)
     const noteLines = [
       message ? `Message: ${message}` : null,
       pageUrl ? `Page URL: ${pageUrl}` : null,
@@ -99,4 +92,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server error' });
   }
 }
-
