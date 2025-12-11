@@ -1,0 +1,7 @@
+{
+  "name": "Aria AI Receptionist",
+  "description": "A landing page for Aria, the world's #1 AI Receptionist, showcasing its features and capabilities with interactive Gemini-powered demos.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
