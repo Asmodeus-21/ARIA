@@ -33,7 +33,8 @@ export default async function handler(req, res) {
       phone_number_collection: { enabled: true },
 
       // Always create a Stripe customer so webhooks can hydrate contact details
-      customer_creation: "always",
+      customer_creation: undefined,
+
 
       // Extra context for the webhook → GHL
       metadata: {
