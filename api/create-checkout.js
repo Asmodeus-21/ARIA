@@ -1,0 +1,35 @@
+// api/create-checkout.js
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    const { priceId } = JSON.parse(req.body);
+
+    if (!priceId) {
+      return res.status(400).json({ error: "Missing priceId" });
+    }
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: "https://ariagroups.xyz/success",
+      cancel_url: "https://ariagroups.xyz/canceled",
+    });
+
+    return res.status(200).json({ url: session.url });
+  } catch (e) {
+    console.error("Stripe Checkout Error:", e);
+    return res.status(500).json({ error: e.message });
+  }
+}
