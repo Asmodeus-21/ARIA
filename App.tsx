@@ -30,7 +30,7 @@ const App: React.FC = () => {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
 
-      {/* BACKGROUND BLOBS */}
+      {/* Background Blobs */}
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-3xl animate-blob"></div>
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
@@ -40,7 +40,7 @@ const App: React.FC = () => {
       <Header onGetStarted={() => setShowLead(true)} />
 
       <main className="relative z-10 pt-20">
-        <Hero
+        <Hero 
           onWatchDemo={openVoice}
           onGetStarted={() => setShowLead(true)}
         />
