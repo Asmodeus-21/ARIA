@@ -130,7 +130,8 @@ const ChatModal: React.FC<Props> = ({
           <h2 className="text-lg font-bold text-gray-900">Chat with Aria</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer"
+            type="button"
+            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer touch-manipulation"
           >
             <X size={22} />
           </button>
@@ -185,7 +186,8 @@ const ChatModal: React.FC<Props> = ({
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading || !chat}
-              className="absolute right-2 p-3 bg-blue-600 text-white rounded-full cursor-pointer transition hover:bg-blue-700 disabled:opacity-50"
+              type="button"
+              className="absolute right-2 p-3 bg-blue-600 text-white rounded-full cursor-pointer transition hover:bg-blue-700 disabled:opacity-50 touch-manipulation"
             >
               <Send size={18} />
             </button>
