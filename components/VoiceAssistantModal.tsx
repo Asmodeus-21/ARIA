@@ -42,8 +42,14 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
       }
     };
 
-    ws.onerror = () => setStatus("Connection error");
-    ws.onclose = () => setStatus("Disconnected");
+    ws.onerror = (event) => {
+      console.error("Voice WS error:", event);
+      setStatus("Connection error");
+    };
+    ws.onclose = (event) => {
+      console.log("Voice WS closed:", event);
+      setStatus("Disconnected");
+    };
 
     wsRef.current = ws;
   };

@@ -13,6 +13,12 @@ interface Message {
   text: string;
 }
 
+// Lightweight phone validation to avoid extra dependencies: accept 7–15 digits after stripping formatting.
+const MIN_PHONE_DIGITS = 7;
+const MAX_PHONE_DIGITS = 15;
+const PHONE_DIGIT_PATTERN = new RegExp(`^\\d{${MIN_PHONE_DIGITS},${MAX_PHONE_DIGITS}}$`);
+const RETRY_DELAY_MS = 400;
+
 const FloatingChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -70,7 +76,12 @@ const FloatingChat: React.FC = () => {
           tags: ["FloatingChat"],
         }),
       });
-      if (!resp.ok) throw new Error("Failed to submit lead");
+      if (!resp.ok) {
+        console.error("Failed to submit lead:", resp.status, resp.statusText);
+        setError(`Lead submission failed (${resp.status}). Please try again.`);
+        setIsSubmitting(false);
+        return false;
+      }
       setIsSubmitting(false);
       return true;
     } catch (err) {
@@ -105,13 +116,19 @@ const FloatingChat: React.FC = () => {
         botReply("Perfect. Last thing — what's your phone number?", "phone");
       }
     } else if (step === "phone") {
+      const phoneDigits = userText.replace(/\D/g, "");
+      const isValidPhone = PHONE_DIGIT_PATTERN.test(phoneDigits);
+      if (!isValidPhone) {
+        botReply("That doesn’t look like a valid phone number. Can you try again?", "phone");
+        return;
+      }
       const newData = { ...formData, phone: userText };
       setFormData(newData);
       const success = await submitToGHL(newData);
       if (success) {
         botReply("Thanks! Our team will reach out shortly.", "done");
       } else {
-        botReply("Could you re-enter your phone? Let's try again.", "phone", 400);
+        botReply("Could you re-enter your phone? Let's try again.", "phone", RETRY_DELAY_MS);
       }
     }
   };
