@@ -45,7 +45,7 @@ const Hero: React.FC<HeroProps> = ({ onWatchDemo, onGetStarted }) => {
             </button>
             <button
               onClick={onWatchDemo}
-              className="relative cursor-pointer group px-8 py-4 text-lg font-bold text-gray-700 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-white/50 hover:bg-white transform hover:scale-105 transition-all duration-300 flex items-center gap-3 pointer-events-auto touch-manipulation"
+              className="relative z-10 cursor-pointer group px-8 py-4 text-lg font-bold text-gray-700 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-white/50 hover:bg-white transform hover:scale-105 transition-all duration-300 flex items-center gap-3 pointer-events-auto touch-manipulation"
             >
               <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                  <Play size={14} fill="currentColor" />
