@@ -28,6 +28,8 @@ const FloatingChat: React.FC = () => {
   const [step, setStep] = useState<
     "intro" | "name" | "email" | "phone" | "done"
   >("intro");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -56,12 +58,32 @@ const FloatingChat: React.FC = () => {
   };
 
   const submitToGHL = async (data: FormData) => {
-    console.log("Submitting to GHL:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const resp = await fetch("/api/ghl-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          source: "Floating Chat",
+          tags: ["FloatingChat"],
+        }),
+      });
+      if (!resp.ok) throw new Error("Failed to submit lead");
+      setIsSubmitting(false);
+      return true;
+    } catch (err) {
+      console.error("Lead capture failed:", err);
+      setError("Something went wrong. Please try again.");
+      setIsSubmitting(false);
+      return false;
+    }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputValue.trim()) return;
+    setError(null);
 
     const userText = inputValue.trim();
     setMessages((prev) => [
@@ -83,12 +105,14 @@ const FloatingChat: React.FC = () => {
         botReply("Perfect. Last thing — what's your phone number?", "phone");
       }
     } else if (step === "phone") {
-      setFormData((prev) => {
-        const newData = { ...prev, phone: userText };
-        submitToGHL(newData);
-        return newData;
-      });
-      botReply("Thanks! Our team will reach out shortly.", "done");
+      const newData = { ...formData, phone: userText };
+      setFormData(newData);
+      const success = await submitToGHL(newData);
+      if (success) {
+        botReply("Thanks! Our team will reach out shortly.", "done");
+      } else {
+        botReply("Could you re-enter your phone? Let's try again.", "phone", 400);
+      }
     }
   };
 
@@ -153,6 +177,12 @@ const FloatingChat: React.FC = () => {
             </div>
           )}
 
+          {error && (
+            <div className="text-xs text-red-500 px-2">
+              {error}
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -178,11 +208,12 @@ const FloatingChat: React.FC = () => {
                     ? "(555) 000-0000"
                     : "Type a message..."
                 }
-                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60"
+                disabled={isSubmitting}
               />
               <button
                 onClick={handleSend}
-                disabled={!inputValue.trim()}
+                disabled={!inputValue.trim() || isSubmitting}
                 className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50"
               >
                 <Send size={16} />
