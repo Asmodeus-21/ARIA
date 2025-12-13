@@ -12,7 +12,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "dependencies": {
-    "@google/genai": "^1.31.0",
     "form-data": "^4.0.4",
     "lucide-react": "^0.556.0",
     "openai": "^4.77.0",
