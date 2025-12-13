@@ -1,0 +1,26 @@
+.noscript-fallback {
+  padding: 1.5rem;
+  max-width: 60rem;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.noscript-fallback__list {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+  list-style: disc;
+}
+
+.noscript-fallback__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.noscript-fallback__intro {
+  margin-bottom: 1rem;
+}
+
+.noscript-fallback__note {
+  margin: 0;
+}
