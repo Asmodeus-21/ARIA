@@ -118,12 +118,12 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
                 <button
                   type="button"
                   onClick={handleClick}
-                  className={`relative z-10 w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border pointer-events-auto
+                  className={`w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 border active:scale-95 transform
                     ${
                       plan.isFeatured
                         ? 'bg-blue-600 text-white border-transparent hover:bg-blue-700 shadow-lg hover:shadow-blue-500/30'
                         : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg'
-                    } touch-manipulation`}
+                    }`}
                 >
                   {plan.name === 'Enterprise' ? 'Contact Sales' : `Get ${plan.name}`}
                 </button>

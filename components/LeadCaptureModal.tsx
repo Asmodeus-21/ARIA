@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Loader, CheckCircle } from "lucide-react";
+import { zIndex } from '../constants';
 
 interface Props {
   onClose: () => void;
@@ -47,12 +48,16 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[18000] flex items-center justify-center p-4 pointer-events-auto overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      style={{ zIndex: zIndex.modalBackdrop }}
+    >
       <div
         className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up max-h-[90vh] flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-labelledby="lead-modal-title"
+        style={{ zIndex: zIndex.modal }}
       >
 
         {/* HEADER */}
@@ -61,7 +66,8 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer touch-manipulation"
+            className="p-2 rounded-full hover:bg-gray-200 active:bg-gray-300 transition"
+            aria-label="Close modal"
           >
             <X size={20} />
           </button>
@@ -138,7 +144,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
+              className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {status === "loading" ? (
                 <Loader className="animate-spin" />

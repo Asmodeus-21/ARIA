@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Play } from 'lucide-react';
+import { zIndex } from '../constants';
 
 interface CTAProps {
     onStartNow: () => void;
@@ -9,7 +10,7 @@ interface CTAProps {
 
 const CTA: React.FC<CTAProps> = ({ onStartNow, onChatWithAria }) => {
   return (
-    <section className="py-20 sm:py-32 relative z-20 overflow-hidden bg-gray-900">
+    <section className="py-20 sm:py-32 relative overflow-hidden bg-gray-900" style={{ zIndex: zIndex.content }}>
       
       {/* Animated Background Mesh */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
@@ -30,16 +31,16 @@ const CTA: React.FC<CTAProps> = ({ onStartNow, onChatWithAria }) => {
           Join 100,000+ businesses growing faster with AI.
         </p>
         
-        <div className="mt-12 flex flex-wrap justify-center gap-5 relative z-50 pointer-events-auto">
+        <div className="mt-12 flex flex-wrap justify-center gap-5">
           <button
             onClick={onStartNow}
-            className="cursor-pointer px-10 py-4 text-lg font-bold text-blue-900 bg-white rounded-full shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.7)] hover:bg-gray-50 transform hover:scale-105 transition-all duration-300 pointer-events-auto border border-white touch-manipulation"
+            className="px-10 py-4 text-lg font-bold text-blue-900 bg-white rounded-full shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.7)] hover:bg-gray-50 transform hover:scale-105 active:scale-95 transition-all duration-300 border border-white"
           >
             Start Now
           </button>
           <button
             onClick={onChatWithAria}
-            className="cursor-pointer px-10 py-4 text-lg font-bold text-white bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 transform hover:scale-105 transition-all duration-300 flex items-center gap-3 pointer-events-auto touch-manipulation"
+            className="px-10 py-4 text-lg font-bold text-white bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-3"
           >
             <span className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg">
                 <Play size={14} fill="currentColor" />

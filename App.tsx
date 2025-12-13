@@ -17,6 +17,7 @@ import ChatModal from './components/ChatModal';
 import VoiceAssistantModal from './components/VoiceAssistantModal';
 import LeadCaptureModal from './components/LeadCaptureModal';
 import FloatingChat from './components/FloatingChat';
+import { zIndex } from './constants';
 
 const App: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
@@ -31,7 +32,10 @@ const App: React.FC = () => {
     <div className="relative min-h-screen overflow-x-hidden">
 
       {/* Background Blobs */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+      <div 
+        className="fixed inset-0 pointer-events-none overflow-hidden" 
+        style={{ zIndex: zIndex.backgroundBlobs }}
+      >
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-3xl animate-blob"></div>
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-[-20%] left-[20%] w-[500px] h-[500px] bg-pink-200/30 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
@@ -39,7 +43,7 @@ const App: React.FC = () => {
 
       <Header onGetStarted={() => setShowLead(true)} />
 
-      <main className="relative z-10 pt-20">
+      <main className="relative pt-20" style={{ zIndex: zIndex.content }}>
         <Hero 
           onWatchDemo={openVoice}
           onGetStarted={() => setShowLead(true)}

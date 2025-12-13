@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Mic, MicOff } from "lucide-react";
+import { zIndex } from '../constants';
 
 interface Props {
   onClose: () => void;
@@ -184,8 +185,14 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[30000] p-4">
-      <div className="bg-white/95 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      style={{ zIndex: zIndex.modalBackdrop }}
+    >
+      <div 
+        className="bg-white/95 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        style={{ zIndex: zIndex.modal }}
+      >
 
         {/* Header */}
         <header className="p-6 border-b border-gray-200 flex justify-between items-center bg-white/70">
@@ -193,7 +200,8 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
           <button
             onClick={onClose}
             type="button"
-            className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition cursor-pointer touch-manipulation"
+            className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-200 active:bg-gray-300 transition"
+            aria-label="Close modal"
           >
             <X size={24} />
           </button>
@@ -233,7 +241,8 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
               onClick={toggleListen}
               type="button"
               aria-pressed={isListening}
-              className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl transition cursor-pointer touch-manipulation ${
+              aria-label={isListening ? "Stop recording" : "Start recording"}
+              className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl transition active:scale-95 ${
                 isListening ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
