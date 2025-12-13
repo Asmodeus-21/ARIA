@@ -8,44 +8,88 @@ interface Props {
 const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
   const [messages, setMessages] = useState<{ from: "user" | "aria"; text: string }[]>([]);
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState("Click to start");
+  const [status, setStatus] = useState("Tap mic to start");
   const [volume, setVolume] = useState(0);
 
-  const wsRef = useRef<WebSocket | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // Connect to ElevenLabs proxy
-  const connectWS = () => {
-    const ws = new WebSocket(`wss://${window.location.host}/api/aria-realtime`);
+  // Process audio with the realtime API
+  const processAudio = async (audioBlob: Blob) => {
+    try {
+      setStatus("Processing...");
 
-    ws.onopen = () => {
-      setStatus("Connected. Tap mic to talk.");
-    };
+      // Convert blob to base64 using browser-compatible method
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64Audio = btoa(binary);
 
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
+      // Send to API
+      const response = await fetch('/api/aria-realtime', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          audio_base64: base64Audio
+        })
+      });
 
-        if (msg.type === "assistant_response") {
-          if (msg.text) {
-            setMessages((prev) => [...prev, { from: "aria", text: msg.text }]);
-          }
+      if (!response.ok) {
+        throw new Error('Failed to process audio');
+      }
 
-          if (msg.audio) {
-            new Audio(`data:audio/wav;base64,${msg.audio}`).play();
+      // Read newline-delimited JSON response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Process complete lines
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const msg = JSON.parse(line);
+
+            if (msg.type === 'transcription') {
+              setMessages((prev) => [...prev, { from: "user", text: msg.text }]);
+            } else if (msg.type === 'response') {
+              setMessages((prev) => [...prev, { from: "aria", text: msg.text }]);
+            } else if (msg.type === 'audio' && msg.audio_base64) {
+              // Play audio response
+              const audio = new Audio(`data:audio/mpeg;base64,${msg.audio_base64}`);
+              audio.play().catch(err => console.error('Audio playback error:', err));
+            }
+          } catch (err) {
+            console.error("JSON parse error:", err);
           }
         }
-      } catch (err) {
-        console.error("WS message error:", err);
       }
-    };
 
-    ws.onclose = () => {
-      setStatus("Disconnected");
-    };
-
-    wsRef.current = ws;
+      setStatus("Ready. Tap mic to talk again.");
+    } catch (err) {
+      console.error("Audio processing error:", err);
+      setStatus("Error. Try again.");
+    }
   };
 
   // Voice recording
@@ -79,12 +123,7 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
 
     recorder.onstop = () => {
       const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-
-      blob.arrayBuffer().then((buffer) => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(buffer);
-        }
-      });
+      processAudio(blob);
     };
 
     recorder.start();
@@ -92,7 +131,6 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
 
   const stopRecording = () => {
     setIsListening(false);
-    setStatus("Processing...");
     mediaRecorderRef.current?.stop();
   };
 
@@ -100,11 +138,6 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
     if (!isListening) startRecording();
     else stopRecording();
   };
-
-  useEffect(() => {
-    connectWS();
-    return () => wsRef.current?.close();
-  }, []);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[30000] p-4">

@@ -13,10 +13,10 @@ const PRICE_IDS: Record<string, string> = {
   growth:  'price_1SdS4cP5hYPh0Vt1sme5Dtat', // $997/mo
 };
 
-// Calls your /api/create-checkout endpoint and opens Stripe Checkout
+// Calls your /api/create-checkout-session endpoint and opens Stripe Checkout
 const startCheckout = async (priceId: string, planName: string) => {
   try {
-    const res = await fetch('/api/create-checkout', {
+    const res = await fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ priceId, planName }),
@@ -125,12 +125,13 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
 
                 <button
                   onClick={handleClick}
-                  className={`w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border
+                  className={`w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border pricing-card btn relative z-[85]
                     ${
                       plan.isFeatured
                         ? 'bg-blue-600 text-white border-transparent hover:bg-blue-700 shadow-lg hover:shadow-blue-500/30'
                         : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg'
                     }`}
+                  style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                 >
                   {plan.name === 'Enterprise' ? 'Contact Sales' : `Get ${plan.name}`}
                 </button>

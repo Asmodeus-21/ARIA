@@ -93,7 +93,7 @@ const FloatingChat: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end">
+    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end floating-chat-container">
 
       {/* CHAT BOX */}
       <div
@@ -103,8 +103,9 @@ const FloatingChat: React.FC = () => {
           bg-white/90 backdrop-blur-xl
           border border-white/50 shadow-2xl rounded-3xl
           overflow-hidden transition-all duration-500 origin-bottom-right
-          ${isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"}
+          ${isOpen ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-90 translate-y-10 pointer-events-none"}
         `}
+        style={{ touchAction: 'manipulation' }}
       >
         {/* HEADER */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center">
@@ -198,11 +199,19 @@ const FloatingChat: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsOpen(!isOpen)}
         className={`
           relative group w-14 h-14 sm:w-16 sm:h-16
-          rounded-full shadow-2xl transition-all
+          rounded-full shadow-2xl transition-all cursor-pointer
           ${isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"}
         `}
+        style={{ 
+          pointerEvents: 'auto', 
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent'
+        }}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
+        tabIndex={0}
       >
         {isOpen ? (
           <X size={26} className="text-white" />
