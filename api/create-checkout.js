@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-       line_items: [{ price: resolvedPriceId, quantity: 1 }],
+      line_items: [{ price: resolvedPriceId, quantity: 1 }],
 
       // Improve conversion + data quality
       allow_promotion_codes: true,
@@ -51,13 +51,13 @@ export default async function handler(req, res) {
       customer_creation: undefined,
 
 
-       // Extra context for the webhook → GHL
-       metadata: {
-         planName: planName || normalizedPlanKey || "",
-         ...(normalizedPlanKey ? { planKey: normalizedPlanKey } : {}),
-         priceId: resolvedPriceId,
-         source: "Aria Website",
-       },
+      // Extra context for the webhook → GHL
+      metadata: {
+        planName: planName || normalizedPlanKey || "",
+        ...(normalizedPlanKey ? { planKey: normalizedPlanKey } : {}),
+        priceId: resolvedPriceId,
+        source: "Aria Website",
+      },
 
       // Post-checkout redirects
       success_url: `${siteUrl}/success`,
