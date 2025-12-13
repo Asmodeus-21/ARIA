@@ -33,7 +33,9 @@ export default async function handler(req, res) {
     }
 
     // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
-    const normalizedPlanKey = normalizeKey(planKey) || normalizeKey(planName);
+    const providedPlanKey = normalizeKey(planKey);
+    const fallbackPlanKey = planKey === undefined || planKey === null ? normalizeKey(planName) : "";
+    const normalizedPlanKey = providedPlanKey || fallbackPlanKey;
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
@@ -44,10 +46,10 @@ export default async function handler(req, res) {
     const siteUrl = process.env.SITE_URL || "https://ariagroups.xyz";
     const metadata = {
       planName: planName || normalizedPlanKey || "",
+      planKey: normalizedPlanKey,
       priceId: resolvedPriceId,
       source: "Aria Website",
     };
-    if (normalizedPlanKey) metadata.planKey = normalizedPlanKey;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
