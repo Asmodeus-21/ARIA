@@ -13,6 +13,16 @@ interface Message {
   text: string;
 }
 
+// Lightweight phone validation to avoid extra dependencies: accept 7–15 digits after stripping formatting.
+const MIN_PHONE_DIGITS = 7;
+const MAX_PHONE_DIGITS = 15;
+const PHONE_DIGIT_PATTERN = new RegExp(`^\\d{${MIN_PHONE_DIGITS},${MAX_PHONE_DIGITS}}$`);
+const RETRY_DELAY_MS = 400;
+// Compute once at module load to avoid repeated prototype checks
+const ENTER_KEY_HINT_SUPPORTED =
+  typeof HTMLInputElement !== "undefined" &&
+  "enterKeyHint" in HTMLInputElement.prototype;
+
 const FloatingChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -28,6 +38,8 @@ const FloatingChat: React.FC = () => {
   const [step, setStep] = useState<
     "intro" | "name" | "email" | "phone" | "done"
   >("intro");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -56,12 +68,37 @@ const FloatingChat: React.FC = () => {
   };
 
   const submitToGHL = async (data: FormData) => {
-    console.log("Submitting to GHL:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const resp = await fetch("/api/ghl-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          source: "Floating Chat",
+          tags: ["FloatingChat"],
+        }),
+      });
+      if (!resp.ok) {
+        console.error("Failed to submit lead:", resp.status, resp.statusText);
+        setError(`Lead submission failed (${resp.status}). Please try again.`);
+        setIsSubmitting(false);
+        return false;
+      }
+      setIsSubmitting(false);
+      return true;
+    } catch (err) {
+      console.error("Lead capture failed:", err);
+      setError("Something went wrong. Please try again.");
+      setIsSubmitting(false);
+      return false;
+    }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputValue.trim()) return;
+    setError(null);
 
     const userText = inputValue.trim();
     setMessages((prev) => [
@@ -83,17 +120,28 @@ const FloatingChat: React.FC = () => {
         botReply("Perfect. Last thing — what's your phone number?", "phone");
       }
     } else if (step === "phone") {
-      setFormData((prev) => {
-        const newData = { ...prev, phone: userText };
-        submitToGHL(newData);
-        return newData;
-      });
-      botReply("Thanks! Our team will reach out shortly.", "done");
+      const phoneDigits = userText.replace(/\D/g, "");
+      const isValidPhone = PHONE_DIGIT_PATTERN.test(phoneDigits);
+      if (!isValidPhone) {
+        botReply("That doesn’t look like a valid phone number. Can you try again?", "phone");
+        return;
+      }
+      const newData = { ...formData, phone: userText };
+      setFormData(newData);
+      const success = await submitToGHL(newData);
+      if (success) {
+        botReply("Thanks! Our team will reach out shortly.", "done");
+      } else {
+        botReply("Could you re-enter your phone? Let's try again.", "phone", RETRY_DELAY_MS);
+      }
     }
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end floating-chat-container">
+    <div
+      className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end floating-chat-container"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
 
       {/* CHAT BOX */}
       <div
@@ -127,7 +175,7 @@ const FloatingChat: React.FC = () => {
         </div>
 
         {/* MESSAGES */}
-        <div className="h-[55vh] sm:h-[350px] overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+        <div className="h-[55vh] sm:h-[350px] overflow-y-auto overscroll-contain p-4 space-y-4 bg-gray-50/50">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
@@ -154,6 +202,12 @@ const FloatingChat: React.FC = () => {
             </div>
           )}
 
+          {error && (
+            <div className="text-xs text-red-500 px-2">
+              {error}
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -166,12 +220,17 @@ const FloatingChat: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex gap-2 relative">
+            <form
+              className="flex gap-2 relative"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+            >
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder={
                   step === "email"
                     ? "name@example.com"
@@ -179,16 +238,18 @@ const FloatingChat: React.FC = () => {
                     ? "(555) 000-0000"
                     : "Type a message..."
                 }
-                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                {...(ENTER_KEY_HINT_SUPPORTED ? { enterKeyHint: "send" as const } : {})}
+                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60 touch-manipulation"
+                disabled={isSubmitting}
               />
               <button
-                onClick={handleSend}
-                disabled={!inputValue.trim()}
-                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50"
+                type="submit"
+                disabled={!inputValue.trim() || isSubmitting}
+                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50 touch-manipulation"
               >
                 <Send size={16} />
               </button>
-            </div>
+            </form>
           )}
         </div>
 
@@ -202,7 +263,7 @@ const FloatingChat: React.FC = () => {
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsOpen(!isOpen)}
         className={`
           relative group w-14 h-14 sm:w-16 sm:h-16
-          rounded-full shadow-2xl transition-all cursor-pointer
+          rounded-full shadow-2xl transition-all cursor-pointer touch-manipulation
           ${isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"}
         `}
         style={{ 

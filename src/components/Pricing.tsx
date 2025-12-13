@@ -51,7 +51,6 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {pricingPlans.map((plan) => {
             const key = plan.name.toLowerCase(); // "trial" | "starter" | "growth" | "enterprise"
-            const priceId = PRICE_IDS[key];
 
             const handleClick = () => {
               if (plan.name === 'Enterprise') {
@@ -59,11 +58,11 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
                 onGetStarted();
                 return;
               }
-              if (!priceId) {
+              if (!['trial', 'starter', 'growth'].includes(key)) {
                 alert('This plan is not configured yet.');
                 return;
               }
-              startCheckout(priceId, plan.name);
+              startCheckout(key, plan.name);
             };
 
             return (
@@ -124,8 +123,9 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
                 </ul>
 
                 <button
+                  type="button"
                   onClick={handleClick}
-                  className={`w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border pricing-card btn relative z-[85]
+                  className={`relative z-[85] w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border pointer-events-auto touch-manipulation pricing-card btn
                     ${
                       plan.isFeatured
                         ? 'bg-blue-600 text-white border-transparent hover:bg-blue-700 shadow-lg hover:shadow-blue-500/30'
