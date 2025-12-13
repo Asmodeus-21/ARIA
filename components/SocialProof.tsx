@@ -11,8 +11,8 @@ const SocialProof: React.FC = () => {
         </p>
         
         <div className="relative w-full overflow-hidden group">
-            <div className="absolute top-0 left-0 h-full w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
-            <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-white to-transparent z-10"></div>
+            <div className="absolute top-0 left-0 h-full w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
             
             <div className="flex animate-marquee-infinite items-center">
                 {/* Double the logos for infinite loop */}

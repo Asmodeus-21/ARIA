@@ -12,7 +12,7 @@ const CTA: React.FC<CTAProps> = ({ onStartNow, onChatWithAria }) => {
     <section className="py-20 sm:py-32 relative z-20 overflow-hidden bg-gray-900">
       
       {/* Animated Background Mesh */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-indigo-900"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
         <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] animate-spin-slow bg-gradient-to-b from-transparent via-blue-500/10 to-transparent blur-3xl"></div>

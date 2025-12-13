@@ -17,7 +17,7 @@ const Step = ({ icon, title, description, index }: { icon: React.ReactNode, titl
             
             {/* Glossy Icon Container */}
             <div className="relative group cursor-default">
-                <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"></div>
                 <div className="relative flex items-center justify-center h-24 w-24 rounded-2xl bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] border border-white/80 ring-1 ring-blue-50 backdrop-blur-xl group-hover:-translate-y-2 group-hover:scale-105 transition-all duration-300">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/80 to-transparent pointer-events-none"></div>
                     {icon}

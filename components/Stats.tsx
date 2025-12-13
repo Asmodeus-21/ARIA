@@ -11,7 +11,7 @@ const StatItem = ({ value, label, suffix = '', precision = 0 }: { value: number,
     return (
         <div ref={ref} className="text-center group cursor-default transition-all duration-500 hover:transform hover:translate-y-[-5px]">
             <div className="relative inline-block">
-                <div className="absolute inset-0 bg-blue-200/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-blue-200/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 <p className="relative text-5xl sm:text-7xl font-bold gradient-text tracking-tighter group-hover:scale-110 transition-transform duration-300 origin-center">
                     {count.toFixed(precision)}{suffix}
                 </p>
