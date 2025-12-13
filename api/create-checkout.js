@@ -2,21 +2,12 @@
 
 import Stripe from "stripe";
 
-const STRIPE_SECRET_SOURCE = process.env.STRIPE_SECRET
-  ? "STRIPE_SECRET"
-  : process.env.STRIPE_SECRET_KEY
-    ? "STRIPE_SECRET_KEY"
-    : null;
 const STRIPE_SECRET = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY || null;
 const PRICE_IDS = {
   trial: process.env.STRIPE_PRICE_TRIAL || "price_1SdS2xP5hYPh0Vt1rivOqGnr",
   starter: process.env.STRIPE_PRICE_STARTER || "price_1SdS3pP5hYPh0Vt1WyTaDp0i",
   growth: process.env.STRIPE_PRICE_GROWTH || "price_1SdS4cP5hYPh0Vt1sme5Dtat",
 };
-
-if (STRIPE_SECRET_SOURCE === "STRIPE_SECRET_KEY") {
-  console.info("Using STRIPE_SECRET_KEY for Stripe authentication");
-}
 
 const stripe = STRIPE_SECRET
   ? new Stripe(STRIPE_SECRET, { apiVersion: "2023-10-16" })
@@ -46,8 +37,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
-    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys when planKey isn't provided.
-    const normalizedPlanKey = sanitizeKey(planKey) || sanitizeKey(planName);
+    const basePlanKey = sanitizeKey(planKey);
+    // planName is only used when planKey is missing (undefined/null) to allow legacy callers.
+    const fallbackPlanKey = planKey === undefined || planKey === null ? sanitizeKey(planName) : "";
+    const normalizedPlanKey = basePlanKey || fallbackPlanKey;
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
@@ -73,8 +66,6 @@ export default async function handler(req, res) {
       phone_number_collection: { enabled: true },
 
       // Always create a Stripe customer so webhooks can hydrate contact details
-      customer_creation: undefined,
-
 
       // Extra context for the webhook → GHL
       metadata,
