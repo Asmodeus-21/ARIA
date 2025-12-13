@@ -28,7 +28,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
-    const normalizedPlanKey = (planKey || planName || "").toLowerCase();
+    // Prefer explicit planKey, fall back to planName
+    const normalizedPlanKey = ((planKey && typeof planKey === "string") ? planKey : planName || "").toLowerCase();
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
     if (!resolvedPriceId) {
@@ -50,10 +51,10 @@ export default async function handler(req, res) {
       customer_creation: undefined,
 
 
-      // Extra context for the webhook → GHL
+       // Extra context for the webhook → GHL
        metadata: {
          planName: planName || normalizedPlanKey || "",
-         planKey: normalizedPlanKey || undefined,
+         ...(normalizedPlanKey ? { planKey: normalizedPlanKey } : {}),
          priceId: resolvedPriceId,
          source: "Aria Website",
        },
