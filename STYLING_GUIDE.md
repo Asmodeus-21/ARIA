@@ -35,8 +35,8 @@ export const zIndex = {
   modal: 1010,              // Modal content
   
   // Floating elements (highest priority)
-  floatingChat: 9000,       // Floating chat widget
-  toast: 9100,              // Toast notifications (if added)
+  floatingChat: 1020,       // Floating chat widget
+  toast: 1030,              // Toast notifications (if added)
 } as const;
 ```
 

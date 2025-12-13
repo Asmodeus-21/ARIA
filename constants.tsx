@@ -213,6 +213,6 @@ export const zIndex = {
   modal: 1010,
   
   // Floating elements (highest priority)
-  floatingChat: 9000,
-  toast: 9100,
+  floatingChat: 1020,
+  toast: 1030,
 } as const;

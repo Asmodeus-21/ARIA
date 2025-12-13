@@ -37,13 +37,15 @@ const Header: React.FC<HeaderProps> = ({ onGetStarted }) => {
         <div className="flex items-center justify-between h-16 sm:h-20 relative">
           
           {/* Logo */}
-          <button 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex-shrink-0"
-            aria-label="Scroll to top"
-          >
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Aria</h1>
-          </button>
+          <div className="flex-shrink-0">
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-2xl font-bold text-gray-900 tracking-tight"
+              aria-label="Scroll to top"
+            >
+              Aria
+            </button>
+          </div>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -99,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ onGetStarted }) => {
             }`}
             style={{ zIndex: zIndex.dropdown }}
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mx-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden px-4 mx-4">
               <a
                 href="#features"
                 onClick={(e) => scrollToSection(e, 'features')}

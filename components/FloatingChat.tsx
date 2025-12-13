@@ -246,7 +246,7 @@ const FloatingChat: React.FC = () => {
                     : "Type a message..."
                 }
                 {...(ENTER_KEY_HINT_SUPPORTED ? { enterKeyHint: "send" as const } : {})}
-                className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60"
+                className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60 min-h-[44px]"
                 disabled={isSubmitting}
               />
               <button
