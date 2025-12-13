@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/noscript.css" />
     <style>
       body {
         font-family: 'Inter', sans-serif;
@@ -102,6 +101,30 @@
   </head>
   <body class="bg-white antialiased text-gray-900">
     <noscript>
+      <style>
+        .noscript-fallback {
+          padding: 1.5rem;
+          max-width: 60rem;
+          margin: 0 auto;
+          line-height: 1.5;
+        }
+        .noscript-fallback__list {
+          padding-left: 1.25rem;
+          margin-bottom: 0.75rem;
+          list-style: disc;
+        }
+        .noscript-fallback__title {
+          font-size: 1.75rem;
+          font-weight: 800;
+          margin-bottom: 0.75rem;
+        }
+        .noscript-fallback__intro {
+          margin-bottom: 1rem;
+        }
+        .noscript-fallback__note {
+          margin: 0;
+        }
+      </style>
       <div class="noscript-fallback">
         <h1 class="noscript-fallback__title">Aria — AI Receptionist (Static Preview)</h1>
         <p class="noscript-fallback__intro">JavaScript powers the full experience. The actions below are available once JavaScript is enabled:</p>
