@@ -25,23 +25,28 @@ const FloatingChat: React.FC = () => {
   ]);
 
   const [inputValue, setInputValue] = useState("");
-  const [step, setStep] = useState<"intro" | "name" | "email" | "phone" | "done">(
-    "intro"
-  );
+  const [step, setStep] = useState<
+    "intro" | "name" | "email" | "phone" | "done"
+  >("intro");
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
   });
-  const [isTyping, setIsTyping] = useState(false);
 
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const botReply = (text: string, nextStep: typeof step, delay = 1000) => {
+  const botReply = (
+    text: string,
+    nextStep: typeof step,
+    delay = 700
+  ) => {
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
@@ -51,7 +56,7 @@ const FloatingChat: React.FC = () => {
   };
 
   const submitToGHL = async (data: FormData) => {
-    console.log("Submitting:", data);
+    console.log("Submitting to GHL:", data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
@@ -59,20 +64,23 @@ const FloatingChat: React.FC = () => {
     if (!inputValue.trim()) return;
 
     const userText = inputValue.trim();
-    setMessages((prev) => [...prev, { id: Date.now(), role: "user", text: userText }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", text: userText },
+    ]);
     setInputValue("");
 
     if (step === "intro") {
-      botReply("Great! To get started, what's your name?", "name");
+      botReply("Great! To get started, what is your name?", "name");
     } else if (step === "name") {
       setFormData((prev) => ({ ...prev, name: userText }));
-      botReply(`Nice to meet you, ${userText}! What's your email?`, "email");
+      botReply(`Nice to meet you, ${userText}! What's the best email for info?`, "email");
     } else if (step === "email") {
       if (!userText.includes("@")) {
-        botReply("That email looks invalid. Try again?", "email");
+        botReply("That doesn’t look like a valid email. Try again?", "email");
       } else {
         setFormData((prev) => ({ ...prev, email: userText }));
-        botReply("Perfect. What's your phone number?", "phone");
+        botReply("Perfect. Last thing — what's your phone number?", "phone");
       }
     } else if (step === "phone") {
       setFormData((prev) => {
@@ -80,23 +88,29 @@ const FloatingChat: React.FC = () => {
         submitToGHL(newData);
         return newData;
       });
-      botReply("Thanks! We'll contact you shortly.", "done");
+      botReply("Thanks! Our team will reach out shortly.", "done");
     }
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
-      {/* Chat Window */}
+    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end">
+
+      {/* CHAT BOX */}
       <div
-        className={`mb-4 w-[350px] sm:w-[380px] bg-white/90 backdrop-blur-xl border border-white/50 shadow-2xl rounded-3xl overflow-hidden transition-all duration-500 origin-bottom-right ${
-          isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"
-        }`}
+        className={`
+          mb-4 max-h-[80vh]
+          w-[90vw] sm:w-[380px]
+          bg-white/90 backdrop-blur-xl
+          border border-white/50 shadow-2xl rounded-3xl
+          overflow-hidden transition-all duration-500 origin-bottom-right
+          ${isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"}
+        `}
       >
-        {/* Header */}
+        {/* HEADER */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
-              <Bot size={20} className="text-white" />
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+              <Bot size={18} className="text-white" />
             </div>
             <div>
               <h3 className="text-white font-bold text-sm">Aria Assistant</h3>
@@ -111,8 +125,8 @@ const FloatingChat: React.FC = () => {
           </button>
         </div>
 
-        {/* Messages */}
-        <div className="h-[350px] overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+        {/* MESSAGES */}
+        <div className="h-[55vh] sm:h-[350px] overflow-y-auto p-4 space-y-4 bg-gray-50/50">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
@@ -142,7 +156,7 @@ const FloatingChat: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
+        {/* INPUT */}
         <div className="p-4 bg-white border-t border-gray-100">
           {step === "done" ? (
             <div className="text-center p-2">
@@ -164,9 +178,8 @@ const FloatingChat: React.FC = () => {
                     ? "(555) 000-0000"
                     : "Type a message..."
                 }
-                className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               />
-
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim()}
@@ -176,39 +189,39 @@ const FloatingChat: React.FC = () => {
               </button>
             </div>
           )}
-
-          <div className="text-center mt-2">
-            <p className="text-[10px] text-gray-400">Powered by Aria AI</p>
-          </div>
         </div>
+
       </div>
 
-      {/* Launcher Button */}
+      {/* FLOATING BUTTON */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`relative group w-16 h-16 rounded-full shadow-2xl transition-all ${
-          isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"
-        }`}
+        className={`
+          relative group w-14 h-14 sm:w-16 sm:h-16
+          rounded-full shadow-2xl transition-all
+          ${isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"}
+        `}
       >
         {isOpen ? (
-          <X size={28} className="text-white" />
+          <X size={26} className="text-white" />
         ) : (
           <>
-            <MessageSquare size={28} className="text-white" />
+            <MessageSquare size={26} className="text-white" />
 
-            <span className="absolute top-0 right-0 flex h-5 w-5">
+            <span className="absolute top-0 right-0 flex h-4 w-4 sm:h-5 sm:w-5 scale-90 sm:scale-100">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">
+              <span className="relative inline-flex rounded-full h-full w-full bg-red-500 text-[9px] sm:text-[10px] font-bold text-white items-center justify-center border-2 border-white">
                 1
               </span>
             </span>
 
             <div
-              className={`absolute right-[110%] bg-white px-4 py-2 rounded-xl shadow-xl text-gray-900 text-sm font-bold transition-all ${
-                isHovered ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
-              }`}
+              className={`
+                absolute right-[110%] bg-white px-3 py-2 rounded-xl shadow-xl text-gray-900 text-xs sm:text-sm font-bold transition-all
+                ${isHovered ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"}
+              `}
             >
               Chat with us!
               <div className="absolute top-1/2 -right-1.5 w-3 h-3 bg-white rotate-45"></div>
