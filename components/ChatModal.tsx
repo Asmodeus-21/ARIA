@@ -14,6 +14,7 @@ const ChatModal: React.FC<Props> = ({
   initialMessage,
   systemInstruction
 }) => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,9 +29,19 @@ const ChatModal: React.FC<Props> = ({
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
+    if (!apiKey) {
+      setMessages([
+        {
+          role: 'model',
+          text: "I'm offline right now because no API key is configured."
+        }
+      ]);
+      return;
+    }
+
     try {
       const ai = new GoogleGenAI({
-        apiKey: process.env.API_KEY as string
+        apiKey
       });
 
       const instance = ai.chats.create({
@@ -60,7 +71,7 @@ const ChatModal: React.FC<Props> = ({
         }
       ]);
     }
-  }, []);
+  }, [apiKey, initialMessage, systemInstruction]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || !chat || isLoading) return;
@@ -164,7 +175,7 @@ const ChatModal: React.FC<Props> = ({
             <input
               type="text"
               placeholder="Type your message..."
-              disabled={isLoading}
+              disabled={isLoading || !chat}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSend()}
@@ -173,7 +184,7 @@ const ChatModal: React.FC<Props> = ({
 
             <button
               onClick={handleSend}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || !chat}
               className="absolute right-2 p-3 bg-blue-600 text-white rounded-full cursor-pointer transition hover:bg-blue-700 disabled:opacity-50"
             >
               <Send size={18} />

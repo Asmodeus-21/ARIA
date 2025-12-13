@@ -17,7 +17,8 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
 
   // Connect to ElevenLabs proxy
   const connectWS = () => {
-    const ws = new WebSocket(`wss://${window.location.host}/api/aria-realtime`);
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${protocol}://${window.location.host}/api/aria-realtime`);
 
     ws.onopen = () => {
       setStatus("Connected. Tap mic to talk.");
@@ -41,7 +42,12 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
       }
     };
 
-    ws.onclose = () => {
+    ws.onerror = (event) => {
+      console.error("Voice WS error:", event);
+      setStatus("Connection error");
+    };
+    ws.onclose = (event) => {
+      console.log("Voice WS closed:", event);
       setStatus("Disconnected");
     };
 
