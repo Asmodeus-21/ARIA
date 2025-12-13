@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Send, Bot } from 'lucide-react';
-import { GoogleGenAI, Chat, GenerateContentResponse } from '@google/genai';
-import type { ChatMessage } from '../types';
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+}
 
 interface Props {
   onClose: () => void;
@@ -14,10 +17,14 @@ const ChatModal: React.FC<Props> = ({
   initialMessage,
   systemInstruction
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      text: initialMessage || "Hello! How can I help you today?"
+    }
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [chat, setChat] = useState<Chat | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -27,43 +34,8 @@ const ChatModal: React.FC<Props> = ({
 
   useEffect(scrollToBottom, [messages]);
 
-  useEffect(() => {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: process.env.API_KEY as string
-      });
-
-      const instance = ai.chats.create({
-        model: 'gemini-3-pro-preview',
-        config: {
-          systemInstruction:
-            systemInstruction ||
-            "You are Aria, a friendly and concise AI receptionist."
-        }
-      });
-
-      setChat(instance);
-
-      setMessages([
-        {
-          role: 'model',
-          text: initialMessage || "Hello! How can I help you today?"
-        }
-      ]);
-    } catch (error) {
-      console.error("Gemini failed:", error);
-
-      setMessages([
-        {
-          role: 'model',
-          text: "Sorry, I can't connect to the AI service right now."
-        }
-      ]);
-    }
-  }, []);
-
   const handleSend = useCallback(async () => {
-    if (!input.trim() || !chat || isLoading) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -75,40 +47,67 @@ const ChatModal: React.FC<Props> = ({
     setIsLoading(true);
 
     try {
-      const stream = await chat.sendMessageStream({ message: userMessage.text });
+      // Call our streaming API endpoint
+      const response = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(msg => ({
+            role: msg.role,
+            text: msg.text
+          })),
+          systemInstruction: systemInstruction || "You are Aria, a friendly and concise AI receptionist."
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No response body');
+      }
 
       let buffer = '';
 
-      // Insert placeholder bot message
-      setMessages(prev => [...prev, { role: 'model', text: '...' }]);
+      // Insert placeholder assistant message
+      setMessages(prev => [...prev, { role: 'assistant', text: '...' }]);
 
-      for await (const chunk of stream) {
-        const gcr = chunk as GenerateContentResponse;
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
 
-        if (gcr.text) {
-          buffer += gcr.text;
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
 
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-              role: 'model',
-              text: buffer
-            };
-            return updated;
-          });
-        }
+        // Update the last message with accumulated content
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            text: buffer
+          };
+          return updated;
+        });
       }
     } catch (err) {
-      console.error("Gemini streaming error:", err);
+      console.error("Chat streaming error:", err);
 
       setMessages(prev => [
         ...prev,
-        { role: 'model', text: "Something went wrong." }
+        { role: 'assistant', text: "Sorry, something went wrong. Please try again." }
       ]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, chat]);
+  }, [input, isLoading, messages, systemInstruction]);
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[20000] p-4">
@@ -134,7 +133,7 @@ const ChatModal: React.FC<Props> = ({
                 msg.role === 'user' ? 'justify-end' : ''
               }`}
             >
-              {msg.role === 'model' && (
+              {msg.role === 'assistant' && (
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow">
                   <Bot size={16} />
                 </div>

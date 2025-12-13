@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 
-import Header from './components/Header';
-import Hero from './components/Hero';
-import ValueProp from './components/ValueProp';
-import Features from './components/Features';
-import Stats from './components/Stats';
-import SocialProof from './components/SocialProof';
-import HowItWorks from './components/HowItWorks';
-import NeuralBrain from './components/NeuralBrain';
-import Testimonials from './components/Testimonials';
-import Pricing from './components/Pricing';
-import CTA from './components/CTA';
-import Footer from './components/Footer';
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import ValueProp from '@/components/ValueProp';
+import Features from '@/components/Features';
+import Stats from '@/components/Stats';
+import SocialProof from '@/components/SocialProof';
+import HowItWorks from '@/components/HowItWorks';
+import NeuralBrain from '@/components/NeuralBrain';
+import Testimonials from '@/components/Testimonials';
+import Pricing from '@/components/Pricing';
+import CTA from '@/components/CTA';
+import Footer from '@/components/Footer';
 
-import ChatModal from './components/ChatModal';
-import VoiceAssistantModal from './components/VoiceAssistantModal';
-import LeadCaptureModal from './components/LeadCaptureModal';
-import FloatingChat from './components/FloatingChat';
+import ChatModal from '@/components/ChatModal';
+import VoiceAssistantModal from '@/components/VoiceAssistantModal';
+import LeadCaptureModal from '@/components/LeadCaptureModal';
+import FloatingChat from '@/components/FloatingChat';
 
 const App: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
