@@ -86,6 +86,18 @@
       .animate-pulse-slow {
           animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
+      .noscript-fallback {
+        padding: 24px;
+        max-width: 960px;
+        margin: 0 auto;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.5;
+      }
+      .noscript-fallback__list {
+        padding-left: 20px;
+        margin-bottom: 12px;
+        list-style: disc;
+      }
     </style>
   <script type="importmap">
 {
@@ -101,13 +113,13 @@
   </head>
   <body class="bg-white antialiased text-gray-900">
     <noscript>
-      <div style="padding: 24px; max-width: 960px; margin: 0 auto; font-family: 'Inter', system-ui, -apple-system, sans-serif; line-height: 1.5;">
+      <div class="noscript-fallback">
         <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 12px;">Aria — AI Receptionist (Static Preview)</h1>
         <p style="margin-bottom: 16px;">JavaScript powers the full experience. For non-JS clients, here are the primary actions available on the live site:</p>
-        <ul style="padding-left: 20px; margin: 0 0 12px 0; list-style: disc;">
+        <ul class="noscript-fallback__list">
           <li><strong>Watch Demo</strong> — opens the VoiceAssistantModal demo.</li>
           <li><strong>Get Started / Contact Sales / Request Access</strong> — opens the LeadCaptureModal form.</li>
-          <li><strong>Pricing: Trial, Starter, Growth</strong> — starts Stripe Checkout via POST to <code>/api/create-checkout</code>.</li>
+          <li><strong>Pricing: Trial, Starter, Growth</strong> — starts Stripe Checkout for the selected plan.</li>
           <li><strong>Pricing: Enterprise / Contact Sales</strong> — opens the lead form with Enterprise preselected.</li>
           <li><strong>Floating Chat launcher</strong> — opens the chat widget; Send button submits text.</li>
           <li><strong>Voice Assistant mic</strong> — requests mic permission and begins voice capture.</li>
