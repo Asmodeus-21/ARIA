@@ -19,9 +19,14 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
     try {
       setStatus("Processing...");
 
-      // Convert blob to base64
+      // Convert blob to base64 using browser-compatible method
       const arrayBuffer = await audioBlob.arrayBuffer();
-      const base64Audio = Buffer.from(arrayBuffer).toString('base64');
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64Audio = btoa(binary);
 
       // Send to API
       const response = await fetch('/api/aria-realtime', {
