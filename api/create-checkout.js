@@ -25,15 +25,21 @@ export default async function handler(req, res) {
     const { priceId: bodyPriceId, planName, planKey } = body;
 
     if (!stripe) {
+      console.warn("Stripe secret key is not configured");
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
-    // Prefer explicit planKey, fall back to planName
-    const normalizedPlanKey = ((planKey && typeof planKey === "string") ? planKey : planName || "").toLowerCase();
+    let normalizedPlanKey = "";
+    if (typeof planKey === "string" && planKey.trim()) {
+      normalizedPlanKey = planKey.toLowerCase();
+    } else if (typeof planName === "string" && planName.trim()) {
+      normalizedPlanKey = planName.toLowerCase();
+    }
+
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
     if (!resolvedPriceId) {
-      return res.status(400).json({ error: "Missing priceId" });
+      return res.status(400).json({ error: "Unable to resolve price ID for this plan" });
     }
 
     const siteUrl = process.env.SITE_URL || "https://ariagroups.xyz";
