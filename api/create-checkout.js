@@ -19,6 +19,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
+  /**
+   * Normalizes plan identifiers (name or key) into a lowercase slug for lookup.
+   * Returns an empty string when input is missing or whitespace-only.
+   */
   const sanitizeKey = (value) =>
     typeof value === "string" && value.trim() ? value.toLowerCase() : "";
 
@@ -44,7 +48,7 @@ export default async function handler(req, res) {
     const siteUrl = process.env.SITE_URL || "https://ariagroups.xyz";
     const metadata = {
       planName: planName || normalizedPlanKey || "",
-      planKey: normalizedPlanKey,
+      planKey: normalizedPlanKey || "",
       priceId: resolvedPriceId,
       source: "Aria Website",
     };
