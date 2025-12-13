@@ -39,7 +39,7 @@ const Hero: React.FC<HeroProps> = ({ onWatchDemo, onGetStarted }) => {
           <div className="mt-12 flex flex-wrap justify-center gap-5 relative z-50">
             <button
               onClick={onGetStarted}
-              className="relative cursor-pointer px-8 py-4 text-lg font-bold text-white rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300 btn-shimmer pointer-events-auto touch-manipulation"
+              className="relative z-10 cursor-pointer px-8 py-4 text-lg font-bold text-white rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300 btn-shimmer pointer-events-auto touch-manipulation"
             >
               Get Started
             </button>

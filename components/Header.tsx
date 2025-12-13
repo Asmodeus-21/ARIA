@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ onGetStarted }) => {
           <div className="block pointer-events-auto">
             <button 
               onClick={onGetStarted}
-              className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm active:scale-95 transform duration-150 cursor-pointer touch-manipulation"
+              className="relative z-10 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm active:scale-95 transform duration-150 cursor-pointer pointer-events-auto touch-manipulation"
             >
               Get Started
             </button>
@@ -115,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({ onGetStarted }) => {
               <button
                 type="button"
                 onClick={() => { setIsMenuOpen(false); onGetStarted(); }}
-                className="w-full text-left px-5 py-3 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border-t border-gray-100 touch-manipulation"
+                className="relative z-10 w-full text-left px-5 py-3 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border-t border-gray-100 pointer-events-auto touch-manipulation"
               >
                 Get Started
               </button>
