@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
+    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
     const normalizedPlanKey = normalizeKey(planKey) || normalizeKey(planName);
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
@@ -41,6 +42,12 @@ export default async function handler(req, res) {
     }
 
     const siteUrl = process.env.SITE_URL || "https://ariagroups.xyz";
+    const metadata = {
+      planName: planName || normalizedPlanKey || "",
+      priceId: resolvedPriceId,
+      source: "Aria Website",
+    };
+    if (normalizedPlanKey) metadata.planKey = normalizedPlanKey;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -56,12 +63,7 @@ export default async function handler(req, res) {
 
 
       // Extra context for the webhook → GHL
-      metadata: {
-        planName: planName || normalizedPlanKey || "",
-        planKey: normalizedPlanKey || undefined,
-        priceId: resolvedPriceId,
-        source: "Aria Website",
-      },
+      metadata,
 
       // Post-checkout redirects
       success_url: `${siteUrl}/success`,
