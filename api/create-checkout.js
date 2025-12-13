@@ -2,12 +2,21 @@
 
 import Stripe from "stripe";
 
+const STRIPE_SECRET_SOURCE = process.env.STRIPE_SECRET
+  ? "STRIPE_SECRET"
+  : process.env.STRIPE_SECRET_KEY
+    ? "STRIPE_SECRET_KEY"
+    : null;
 const STRIPE_SECRET = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY || null;
 const PRICE_IDS = {
   trial: process.env.STRIPE_PRICE_TRIAL || "price_1SdS2xP5hYPh0Vt1rivOqGnr",
   starter: process.env.STRIPE_PRICE_STARTER || "price_1SdS3pP5hYPh0Vt1WyTaDp0i",
   growth: process.env.STRIPE_PRICE_GROWTH || "price_1SdS4cP5hYPh0Vt1sme5Dtat",
 };
+
+if (STRIPE_SECRET_SOURCE === "STRIPE_SECRET_KEY") {
+  console.info("Using STRIPE_SECRET_KEY for Stripe authentication");
+}
 
 const stripe = STRIPE_SECRET
   ? new Stripe(STRIPE_SECRET, { apiVersion: "2023-10-16" })
@@ -21,7 +30,8 @@ export default async function handler(req, res) {
 
   /**
    * Normalizes plan identifiers (name or key) into a lowercase slug for lookup.
-   * Returns an empty string when input is missing or whitespace-only.
+   * @param {unknown} value Raw plan identifier (may be undefined/null)
+   * @returns {string} Lowercased identifier or empty string when missing/whitespace
    */
   const sanitizeKey = (value) =>
     typeof value === "string" && value.trim() ? value.toLowerCase() : "";
@@ -36,7 +46,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
-    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
+    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys when planKey isn't provided.
     const normalizedPlanKey = sanitizeKey(planKey) || sanitizeKey(planName);
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
