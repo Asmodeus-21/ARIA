@@ -118,7 +118,7 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
                 <button
                   type="button"
                   onClick={handleClick}
-                  className={`w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border
+                  className={`relative z-10 w-full py-4 text-base font-bold rounded-2xl transition-all duration-300 cursor-pointer border pointer-events-auto
                     ${
                       plan.isFeatured
                         ? 'bg-blue-600 text-white border-transparent hover:bg-blue-700 shadow-lg hover:shadow-blue-500/30'
