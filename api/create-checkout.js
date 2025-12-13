@@ -33,7 +33,6 @@ export default async function handler(req, res) {
     }
 
     // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
-    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
     const normalizedPlanKey = sanitizeKey(planKey) || sanitizeKey(planName);
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
