@@ -2,9 +2,16 @@
 
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET, {
-  apiVersion: "2023-10-16",
-});
+const STRIPE_SECRET = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY || null;
+const PRICE_IDS = {
+  trial: process.env.STRIPE_PRICE_TRIAL || "price_1SdS2xP5hYPh0Vt1rivOqGnr",
+  starter: process.env.STRIPE_PRICE_STARTER || "price_1SdS3pP5hYPh0Vt1WyTaDp0i",
+  growth: process.env.STRIPE_PRICE_GROWTH || "price_1SdS4cP5hYPh0Vt1sme5Dtat",
+};
+
+const stripe = STRIPE_SECRET
+  ? new Stripe(STRIPE_SECRET, { apiVersion: "2023-10-16" })
+  : null;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,20 +19,46 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
+  /**
+   * Normalizes plan identifiers (name or key) into a lowercase slug for lookup.
+   * @param {unknown} value Raw plan identifier (may be undefined/null)
+   * @returns {string} Lowercased identifier or empty string when missing/whitespace
+   */
+  const sanitizeKey = (value) =>
+    typeof value === "string" && value.trim() ? value.toLowerCase() : "";
+
   try {
     // Support both raw string and parsed JSON bodies
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const { priceId, planName } = body;
+    const { priceId: bodyPriceId, planName, planKey } = body;
 
-    if (!priceId) {
-      return res.status(400).json({ error: "Missing priceId" });
+    if (!stripe) {
+      console.warn("Stripe secret key is not configured");
+      return res.status(500).json({ error: "Stripe secret key is not configured" });
+    }
+
+    const basePlanKey = sanitizeKey(planKey);
+    // planName is only used when planKey is missing (undefined/null) to allow legacy callers.
+    const fallbackPlanKey = planKey === undefined || planKey === null ? sanitizeKey(planName) : "";
+    const normalizedPlanKey = basePlanKey || fallbackPlanKey;
+
+    const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
+
+    if (!resolvedPriceId) {
+      return res.status(400).json({ error: "Unable to resolve price ID for this plan" });
     }
 
     const siteUrl = process.env.SITE_URL || "https://ariagroups.xyz";
+    const metadata = {
+      planName: planName || normalizedPlanKey || "",
+      planKey: normalizedPlanKey || "",
+      priceId: resolvedPriceId,
+      source: "Aria Website",
+    };
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: resolvedPriceId, quantity: 1 }],
 
       // Improve conversion + data quality
       allow_promotion_codes: true,
@@ -33,15 +66,9 @@ export default async function handler(req, res) {
       phone_number_collection: { enabled: true },
 
       // Always create a Stripe customer so webhooks can hydrate contact details
-      customer_creation: undefined,
-
 
       // Extra context for the webhook → GHL
-      metadata: {
-        planName: planName || "",
-        priceId,
-        source: "Aria Website",
-      },
+      metadata,
 
       // Post-checkout redirects
       success_url: `${siteUrl}/success`,

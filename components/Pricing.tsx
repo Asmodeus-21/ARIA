@@ -6,20 +6,13 @@ interface PricingProps {
   onGetStarted: () => void; // used for Enterprise / Contact Sales
 }
 
-// Map your plan names to Stripe Price IDs
-const PRICE_IDS: Record<string, string> = {
-  trial:   'price_1SdS2xP5hYPh0Vt1rivOqGnr', // $99/mo
-  starter: 'price_1SdS3pP5hYPh0Vt1WyTaDp0i', // $497/mo
-  growth:  'price_1SdS4cP5hYPh0Vt1sme5Dtat', // $997/mo
-};
-
 // Calls your /api/create-checkout endpoint and opens Stripe Checkout
-const startCheckout = async (priceId: string, planName: string) => {
+const startCheckout = async (planKey: string, planName: string) => {
   try {
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId, planName }),
+      body: JSON.stringify({ planKey, planName }),
     });
 
     const data = await res.json();
@@ -51,7 +44,6 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {pricingPlans.map((plan) => {
             const key = plan.name.toLowerCase(); // "trial" | "starter" | "growth" | "enterprise"
-            const priceId = PRICE_IDS[key];
 
             const handleClick = () => {
               if (plan.name === 'Enterprise') {
@@ -59,11 +51,11 @@ const Pricing: React.FC<PricingProps> = ({ onGetStarted }) => {
                 onGetStarted();
                 return;
               }
-              if (!priceId) {
+              if (!['trial', 'starter', 'growth'].includes(key)) {
                 alert('This plan is not configured yet.');
                 return;
               }
-              startCheckout(priceId, plan.name);
+              startCheckout(key, plan.name);
             };
 
             return (
