@@ -18,6 +18,10 @@ const MIN_PHONE_DIGITS = 7;
 const MAX_PHONE_DIGITS = 15;
 const PHONE_DIGIT_PATTERN = new RegExp(`^\\d{${MIN_PHONE_DIGITS},${MAX_PHONE_DIGITS}}$`);
 const RETRY_DELAY_MS = 400;
+// Compute once at module load to avoid repeated prototype checks
+const ENTER_KEY_HINT_SUPPORTED =
+  typeof HTMLInputElement !== "undefined" &&
+  "enterKeyHint" in HTMLInputElement.prototype;
 
 const FloatingChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -134,7 +138,10 @@ const FloatingChat: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end">
+    <div
+      className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
 
       {/* CHAT BOX */}
       <div
@@ -167,7 +174,7 @@ const FloatingChat: React.FC = () => {
         </div>
 
         {/* MESSAGES */}
-        <div className="h-[55vh] sm:h-[350px] overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+        <div className="h-[55vh] sm:h-[350px] overflow-y-auto overscroll-contain p-4 space-y-4 bg-gray-50/50">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
@@ -212,12 +219,17 @@ const FloatingChat: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex gap-2 relative">
+            <form
+              className="flex gap-2 relative"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+            >
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder={
                   step === "email"
                     ? "name@example.com"
@@ -225,17 +237,18 @@ const FloatingChat: React.FC = () => {
                     ? "(555) 000-0000"
                     : "Type a message..."
                 }
-                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60"
+                {...(ENTER_KEY_HINT_SUPPORTED ? { enterKeyHint: "send" as const } : {})}
+                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60 touch-manipulation"
                 disabled={isSubmitting}
               />
               <button
-                onClick={handleSend}
+                type="submit"
                 disabled={!inputValue.trim() || isSubmitting}
-                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50"
+                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50 touch-manipulation"
               >
                 <Send size={16} />
               </button>
-            </div>
+            </form>
           )}
         </div>
 
@@ -248,7 +261,7 @@ const FloatingChat: React.FC = () => {
         onMouseLeave={() => setIsHovered(false)}
         className={`
           relative group w-14 h-14 sm:w-16 sm:h-16
-          rounded-full shadow-2xl transition-all
+          rounded-full shadow-2xl transition-all touch-manipulation
           ${isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"}
         `}
       >

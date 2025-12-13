@@ -47,15 +47,21 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[18000] flex items-center justify-center p-4 pointer-events-auto">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[18000] flex items-center justify-center p-4 pointer-events-auto overflow-y-auto">
+      <div
+        className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up max-h-[90vh] flex flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lead-modal-title"
+      >
 
         {/* HEADER */}
         <header className="p-5 border-b bg-gray-50 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Get Started with Aria</h2>
+          <h2 id="lead-modal-title" className="text-xl font-bold text-gray-900">Get Started with Aria</h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer"
+            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer touch-manipulation"
           >
             <X size={20} />
           </button>
@@ -69,7 +75,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
             <p className="text-gray-600 mt-2">We’ll reach out shortly.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5 flex-1 overflow-y-auto">
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -79,6 +85,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
                 <input
                   name="firstName"
                   required
+                  value={form.firstName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 />
@@ -91,6 +98,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
                 <input
                   name="lastName"
                   required
+                  value={form.lastName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 />
@@ -103,6 +111,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
                 name="email"
                 type="email"
                 required
+                value={form.email}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
               />
@@ -114,6 +123,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
                 name="phone"
                 type="tel"
                 required
+                value={form.phone}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
               />
@@ -128,7 +138,7 @@ const LeadCaptureModal: React.FC<Props> = ({ onClose }) => {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
             >
               {status === "loading" ? (
                 <Loader className="animate-spin" />

@@ -5,6 +5,11 @@ interface Props {
   onClose: () => void;
 }
 
+const WS_STATES = {
+  CONNECTING: WebSocket.CONNECTING,
+  OPEN: WebSocket.OPEN,
+} as const;
+
 const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
   const [messages, setMessages] = useState<{ from: "user" | "aria"; text: string }[]>([]);
   const [isListening, setIsListening] = useState(false);
@@ -14,9 +19,17 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
   const wsRef = useRef<WebSocket | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Connect to ElevenLabs proxy
   const connectWS = () => {
+    if (
+      wsRef.current &&
+      (wsRef.current.readyState === WS_STATES.OPEN || wsRef.current.readyState === WS_STATES.CONNECTING)
+    ) {
+      return;
+    }
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(`${protocol}://${window.location.host}/api/aria-realtime`);
 
@@ -34,7 +47,16 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
           }
 
           if (msg.audio) {
-            new Audio(`data:audio/wav;base64,${msg.audio}`).play();
+            const audio = new Audio(`data:audio/wav;base64,${msg.audio}`);
+            const cleanup = () => {
+              audio.pause();
+              audio.src = "";
+              audio.onended = null;
+              audio.onerror = null;
+            };
+            audio.onended = cleanup;
+            audio.onerror = cleanup;
+            audio.play().catch((err) => console.warn("Audio playback blocked:", err));
           }
         }
       } catch (err) {
@@ -55,45 +77,89 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
   };
 
   // Voice recording
+  const ensureAudioContext = async () => {
+    if (!audioContextRef.current) {
+      const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
+      audioContextRef.current = new AudioCtx();
+    }
+    if (audioContextRef.current.state === "suspended") {
+      await audioContextRef.current.resume();
+    }
+  };
+
   const startRecording = async () => {
-    setIsListening(true);
-    setStatus("Listening...");
+    try {
+      setIsListening(true);
+      setStatus("Requesting microphone...");
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioChunksRef.current = [];
+      if (!wsRef.current || wsRef.current.readyState !== WS_STATES.OPEN) {
+        connectWS();
+      }
 
-    const recorder = new MediaRecorder(stream);
-    mediaRecorderRef.current = recorder;
+      await ensureAudioContext();
+      if (!navigator.mediaDevices) {
+        throw new Error("Microphone is unavailable in this browser");
+      }
+      if (!navigator.mediaDevices.getUserMedia) {
+        throw new Error("Use a secure, supported browser to enable microphone access");
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      audioChunksRef.current = [];
 
-    // Volume animation
-    const audioCtx = new AudioContext();
-    const analyser = audioCtx.createAnalyser();
-    const source = audioCtx.createMediaStreamSource(stream);
-    source.connect(analyser);
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
 
-    const arr = new Uint8Array(analyser.frequencyBinCount);
+      // Volume animation
+      const audioCtx = audioContextRef.current;
+      if (!audioCtx) {
+        setStatus("Audio unavailable");
+        setIsListening(false);
+        return;
+      }
+      const analyser = audioCtx.createAnalyser();
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
 
-    const loop = () => {
-      analyser.getByteFrequencyData(arr);
-      const avg = arr.reduce((a, b) => a + b, 0) / arr.length / 255;
-      setVolume(avg);
-      if (isListening) requestAnimationFrame(loop);
-    };
-    loop();
+      const arr = new Uint8Array(analyser.frequencyBinCount);
 
-    recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
+      const loop = () => {
+        analyser.getByteFrequencyData(arr);
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length / 255;
+        setVolume(avg);
+        if (isListening) requestAnimationFrame(loop);
+      };
+      loop();
 
-    recorder.onstop = () => {
-      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
 
-      blob.arrayBuffer().then((buffer) => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(buffer);
-        }
-      });
-    };
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
-    recorder.start();
+        blob.arrayBuffer().then((buffer) => {
+          if (wsRef.current?.readyState === WS_STATES.OPEN) {
+            wsRef.current.send(buffer);
+          } else {
+            setStatus("Reconnecting...");
+            connectWS();
+          }
+        });
+
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      };
+
+      recorder.start();
+      setStatus("Listening...");
+    } catch (err) {
+      console.error("Mic error", err);
+      setIsListening(false);
+      if (err instanceof Error && err.message) {
+        setStatus(err.message);
+      } else {
+        setStatus("Mic permission needed");
+      }
+    }
   };
 
   const stopRecording = () => {
@@ -109,7 +175,12 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
 
   useEffect(() => {
     connectWS();
-    return () => wsRef.current?.close();
+    return () => {
+      wsRef.current?.close();
+      mediaRecorderRef.current?.stop();
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      audioContextRef.current?.close().catch((err) => console.warn("Audio context close failed", err));
+    };
   }, []);
 
   return (
@@ -121,7 +192,8 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
           <h2 className="text-xl font-bold text-gray-900">Aria Live Demo</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition cursor-pointer"
+            type="button"
+            className="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition cursor-pointer touch-manipulation"
           >
             <X size={24} />
           </button>
@@ -159,7 +231,9 @@ const VoiceAssistantModal: React.FC<Props> = ({ onClose }) => {
 
             <button
               onClick={toggleListen}
-              className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl transition cursor-pointer ${
+              type="button"
+              aria-pressed={isListening}
+              className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl transition cursor-pointer touch-manipulation ${
                 isListening ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
