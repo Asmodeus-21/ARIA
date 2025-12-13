@@ -190,3 +190,29 @@ export const brandLogos = [
     { name: 'IBM', src: 'https://cdn.simpleicons.org/ibm' },
     { name: 'Oracle', src: 'https://cdn.simpleicons.org/oracle' },
 ];
+
+/**
+ * Z-Index System for consistent layering across desktop and mobile
+ * This ensures proper stacking order and prevents mobile button interaction issues
+ */
+export const zIndex = {
+  // Background layers (behind content)
+  background: -1,
+  backgroundBlobs: 0,
+  
+  // Content layers
+  content: 10,
+  contentRaised: 20,
+  
+  // Navigation and interactive elements
+  header: 100,
+  dropdown: 110,
+  
+  // Modals and overlays
+  modalBackdrop: 1000,
+  modal: 1010,
+  
+  // Floating elements (highest priority)
+  floatingChat: 9000,
+  toast: 9100,
+} as const;

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, Sparkles } from "lucide-react";
+import { zIndex } from '../constants';
 
 interface FormData {
   name: string;
@@ -139,8 +140,11 @@ const FloatingChat: React.FC = () => {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="fixed bottom-4 right-4 flex flex-col items-end"
+      style={{ 
+        zIndex: zIndex.floatingChat,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)' 
+      }}
     >
 
       {/* CHAT BOX */}
@@ -168,7 +172,11 @@ const FloatingChat: React.FC = () => {
               </p>
             </div>
           </div>
-          <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className="text-white/80 hover:text-white active:scale-90 transition"
+            aria-label="Close chat"
+          >
             <X size={20} />
           </button>
         </div>
@@ -238,13 +246,14 @@ const FloatingChat: React.FC = () => {
                     : "Type a message..."
                 }
                 {...(ENTER_KEY_HINT_SUPPORTED ? { enterKeyHint: "send" as const } : {})}
-                className="flex-1 bg-gray-100 rounded-full px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60 touch-manipulation"
+                className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-60"
                 disabled={isSubmitting}
               />
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isSubmitting}
-                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50 touch-manipulation"
+                className="bg-blue-600 text-white p-3 rounded-full shadow-lg disabled:opacity-50 active:scale-90 transition"
+                aria-label="Send message"
               >
                 <Send size={16} />
               </button>
@@ -259,9 +268,11 @@ const FloatingChat: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
+        aria-expanded={isOpen}
         className={`
-          relative group w-14 h-14 sm:w-16 sm:h-16
-          rounded-full shadow-2xl transition-all touch-manipulation
+          relative group w-16 h-16 flex items-center justify-center
+          rounded-full shadow-2xl transition-all active:scale-90
           ${isOpen ? "bg-gray-900 rotate-90" : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-110"}
         `}
       >

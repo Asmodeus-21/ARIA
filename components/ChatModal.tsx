@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Send, Bot } from 'lucide-react';
 import { GoogleGenAI, Chat, GenerateContentResponse } from '@google/genai';
 import type { ChatMessage } from '../types';
+import { zIndex } from '../constants';
 
 interface Props {
   onClose: () => void;
@@ -122,8 +123,14 @@ const ChatModal: React.FC<Props> = ({
   }, [input, isLoading, chat]);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[20000] p-4">
-      <div className="bg-white/90 backdrop-blur-xl w-full max-w-lg h-[80vh] rounded-3xl shadow-2xl border border-white/60 flex flex-col overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+      style={{ zIndex: zIndex.modalBackdrop }}
+    >
+      <div 
+        className="bg-white/90 backdrop-blur-xl w-full max-w-lg h-[80vh] rounded-3xl shadow-2xl border border-white/60 flex flex-col overflow-hidden"
+        style={{ zIndex: zIndex.modal }}
+      >
 
         {/* HEADER */}
         <header className="p-5 border-b border-gray-200 bg-white/60 flex justify-between items-center">
@@ -131,7 +138,8 @@ const ChatModal: React.FC<Props> = ({
           <button
             onClick={onClose}
             type="button"
-            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer touch-manipulation"
+            className="p-2 rounded-full hover:bg-gray-200 active:bg-gray-300 transition"
+            aria-label="Close chat"
           >
             <X size={22} />
           </button>
@@ -187,7 +195,8 @@ const ChatModal: React.FC<Props> = ({
               onClick={handleSend}
               disabled={!input.trim() || isLoading || !chat}
               type="button"
-              className="absolute right-2 p-3 bg-blue-600 text-white rounded-full cursor-pointer transition hover:bg-blue-700 disabled:opacity-50 touch-manipulation"
+              className="absolute right-2 p-3 bg-blue-600 text-white rounded-full transition hover:bg-blue-700 active:scale-90 disabled:opacity-50"
+              aria-label="Send message"
             >
               <Send size={18} />
             </button>
