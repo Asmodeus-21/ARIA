@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const normalizeKey = (value) =>
+  const sanitizeKey = (value) =>
     typeof value === "string" && value.trim() ? value.toLowerCase() : "";
 
   try {
@@ -33,9 +33,8 @@ export default async function handler(req, res) {
     }
 
     // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
-    const providedPlanKey = normalizeKey(planKey);
-    const fallbackPlanKey = planKey === undefined || planKey === null ? normalizeKey(planName) : "";
-    const normalizedPlanKey = providedPlanKey || fallbackPlanKey;
+    // planName originates from UI labels (e.g., "Starter", "Growth") and normalizes to plan keys.
+    const normalizedPlanKey = sanitizeKey(planKey) || sanitizeKey(planName);
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
