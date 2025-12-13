@@ -19,6 +19,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
+  const normalizeKey = (value) =>
+    typeof value === "string" && value.trim() ? value.toLowerCase() : "";
+
   try {
     // Support both raw string and parsed JSON bodies
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
@@ -29,12 +32,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Stripe secret key is not configured" });
     }
 
-    let normalizedPlanKey = "";
-    if (typeof planKey === "string" && planKey.trim()) {
-      normalizedPlanKey = planKey.toLowerCase();
-    } else if (typeof planName === "string" && planName.trim()) {
-      normalizedPlanKey = planName.toLowerCase();
-    }
+    const normalizedPlanKey = normalizeKey(planKey) || normalizeKey(planName);
 
     const resolvedPriceId = bodyPriceId || PRICE_IDS[normalizedPlanKey];
 
@@ -60,7 +58,7 @@ export default async function handler(req, res) {
       // Extra context for the webhook → GHL
       metadata: {
         planName: planName || normalizedPlanKey || "",
-        ...(normalizedPlanKey ? { planKey: normalizedPlanKey } : {}),
+        planKey: normalizedPlanKey || undefined,
         priceId: resolvedPriceId,
         source: "Aria Website",
       },
