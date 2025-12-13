@@ -63,7 +63,7 @@ const NeuralBrain: React.FC = () => {
                     
                     {/* Card 1: The Core Architecture */}
                     <div className="md:col-span-4 bg-white/60 backdrop-blur-xl border border-white/60 rounded-[2.5rem] p-8 sm:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-2xl transition-all duration-500 overflow-hidden group relative hover:scale-[1.01] cursor-default">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700"></div>
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
                         
                         <div className="relative z-10 flex flex-col h-full justify-between">
                             <div className="flex items-start justify-between">
@@ -106,8 +106,8 @@ const NeuralBrain: React.FC = () => {
 
                     {/* Card 2: Speed / Latency */}
                     <div className="md:col-span-2 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 cursor-default">
-                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-blue-600/30 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-blue-600/30 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                         
                         <div className="relative z-10 h-full flex flex-col justify-between">
                             <div className="flex justify-between items-start">
@@ -137,7 +137,7 @@ const NeuralBrain: React.FC = () => {
                     <div className="md:col-span-2 bg-white/60 backdrop-blur-xl border border-white/60 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all duration-500 group hover:scale-[1.02] cursor-default">
                          <div className="h-full flex flex-col justify-between">
                             <div className="w-20 h-20 bg-gradient-to-br from-green-50 to-emerald-100 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-500 ring-1 ring-green-200 shadow-lg shadow-green-500/10 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-white/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="absolute inset-0 bg-white/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                                 <ShieldCheck className="text-green-600 relative z-10" size={40} strokeWidth={1.5} />
                             </div>
                             <div>
