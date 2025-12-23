@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
 import { Play } from 'lucide-react';
+import { zIndex } from '../constants';
 
 interface HeroProps {
   onWatchDemo: () => void;
@@ -16,7 +17,7 @@ const Hero: React.FC<HeroProps> = ({ onWatchDemo, onGetStarted }) => {
     <section ref={ref} className="relative min-h-[85vh] flex flex-col items-center pt-20 pb-20 overflow-visible">
       
       {/* Content Container */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pointer-events-auto">
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ zIndex: zIndex.contentRaised }}>
         <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           
           {/* Badge */}
@@ -35,17 +36,17 @@ const Hero: React.FC<HeroProps> = ({ onWatchDemo, onGetStarted }) => {
             Reinventing how <span className="text-gray-900 font-medium">you</span> handle calls, appointments, calendars, messages, and customers — 24/7, flawlessly.
           </p>
           
-          {/* Buttons - Explicit Z-Index 50 and Pointer Events */}
-          <div className="mt-12 flex flex-wrap justify-center gap-5 relative z-50">
+          {/* Call-to-Action Buttons */}
+          <div className="mt-12 flex flex-wrap justify-center gap-5">
             <button
               onClick={onGetStarted}
-              className="relative z-10 cursor-pointer px-8 py-4 text-lg font-bold text-white rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300 btn-shimmer pointer-events-auto touch-manipulation"
+              className="px-8 py-4 text-lg font-bold text-white rounded-full shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 btn-shimmer"
             >
               Get Started
             </button>
             <button
               onClick={onWatchDemo}
-              className="relative z-10 cursor-pointer group px-8 py-4 text-lg font-bold text-gray-700 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-white/50 hover:bg-white transform hover:scale-105 transition-all duration-300 flex items-center gap-3 pointer-events-auto touch-manipulation"
+              className="group px-8 py-4 text-lg font-bold text-gray-700 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-white/50 hover:bg-white transform hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-3"
             >
               <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                  <Play size={14} fill="currentColor" />
